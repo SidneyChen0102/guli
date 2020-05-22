@@ -9,10 +9,12 @@ import com.sidney.eduservice.mapper.EduChapterMapper;
 import com.sidney.eduservice.service.EduChapterService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.sidney.eduservice.service.EduVideoService;
+import com.sidney.exceptionhandler.GuliException;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.lang.model.element.VariableElement;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -75,5 +77,24 @@ public class EduChapterServiceImpl extends ServiceImpl<EduChapterMapper, EduChap
 
 
         return finalList;
+    }
+
+    @Override
+    public boolean deleteChapter(String chapterId) {
+        //根据chapterId章节id查询小节表，如果查询到数据，不进行删除
+        QueryWrapper<EduVideo> wrapper = new QueryWrapper<>();
+        wrapper.eq("chapter_id",chapterId);
+
+        int count = videoService.count(wrapper);
+        //判断
+        if (count>0){//查询出小节，不进行删除
+           throw new GuliException(20001,"不能删除");
+        }else {//不能查询数据，进行删除
+         //删除
+            int result = baseMapper.deleteById(chapterId);
+            //成功 1>0  ture  失败0>0 fales
+            return result>0;
+        }
+
     }
 }
