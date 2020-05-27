@@ -3,6 +3,7 @@ package com.sidney.eduservice.service;
 import com.sidney.eduservice.entity.EduCourse;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.sidney.eduservice.entity.vo.CourseInfoVo;
+import com.sidney.eduservice.entity.vo.CoursePublishVo;
 import org.springframework.stereotype.Service;
 
 /**
@@ -22,4 +23,8 @@ public interface EduCourseService extends IService<EduCourse> {
     CourseInfoVo getCourseInfo(String courseId);
 
     void updateCourseInfo(CourseInfoVo courseInfoVo);
+
+    CoursePublishVo getPublishCourseInfo(String id);
+
+    void removeCourse(String courseId);
 }

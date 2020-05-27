@@ -1,16 +1,23 @@
 package com.sidney.eduservice.service.impl;
 
+import com.sidney.eduservice.entity.EduChapter;
 import com.sidney.eduservice.entity.EduCourse;
 import com.sidney.eduservice.entity.EduCourseDescription;
+import com.sidney.eduservice.entity.EduVideo;
 import com.sidney.eduservice.entity.vo.CourseInfoVo;
+import com.sidney.eduservice.entity.vo.CoursePublishVo;
 import com.sidney.eduservice.mapper.EduCourseMapper;
+import com.sidney.eduservice.service.EduChapterService;
 import com.sidney.eduservice.service.EduCourseDescriptionService;
 import com.sidney.eduservice.service.EduCourseService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.sidney.eduservice.service.EduVideoService;
 import com.sidney.exceptionhandler.GuliException;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.io.PipedReader;
 
 /**
  * <p>
@@ -25,6 +32,16 @@ public class EduCourseServiceImpl extends ServiceImpl<EduCourseMapper, EduCourse
     //课程描述的注入
     @Autowired
     private EduCourseDescriptionService courseDescriptionService;
+
+    //注入小节和章节
+    @Autowired
+    private EduVideoService eduVideoService;
+
+    @Autowired
+    private EduChapterService eduChapterService;
+
+
+
 
    //添加课程信息基本的方法
     @Override
@@ -89,5 +106,31 @@ public class EduCourseServiceImpl extends ServiceImpl<EduCourseMapper, EduCourse
          description.setDescription(courseInfoVo.getDescription());
         courseDescriptionService.updateById(description);
 
+    }
+
+    //根据课程id查询课程确认信息
+    @Override
+    public CoursePublishVo getPublishCourseInfo(String id) {
+        //调用mapper
+        CoursePublishVo publishCorseInfo = baseMapper.getPublishCorseInfo(id);
+        return publishCorseInfo;
+    }
+
+    @Override
+    public void removeCourse(String courseId) {
+         //1.根据课程id删除小节
+         eduVideoService.removeVideoByCourseId(courseId);
+
+         //2.根据课程id删除章节
+         eduChapterService.removeChapterByCourseId(courseId);
+
+        //3.根据课程id删除描述 描述id和课程id一对一，是一个id，所以用removeById
+        courseDescriptionService.removeById(courseId);
+
+        //4.根据课程id删除课程本身
+        int result = baseMapper.deleteById(courseId);
+        if (result==0){//失败返回
+            throw new GuliException(20001,"删除失败");
+        }
     }
 }
