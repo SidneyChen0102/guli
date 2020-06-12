@@ -3,16 +3,24 @@ package com.sidney.vod.service.impl;
 import com.aliyun.vod.upload.impl.UploadVideoImpl;
 import com.aliyun.vod.upload.req.UploadStreamRequest;
 import com.aliyun.vod.upload.resp.UploadStreamResponse;
+import com.aliyuncs.DefaultAcsClient;
+import com.aliyuncs.vod.model.v20170321.DeleteVideoRequest;
 import com.sidney.commonutils.R;
+import com.sidney.exceptionhandler.GuliException;
 import com.sidney.vod.service.VodService;
 import com.sidney.vod.utils.ConstantVodUtils;
+import com.sidney.vod.utils.InitVodClient;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
+
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Sidney
@@ -57,4 +65,29 @@ public class VodServiceImpl  implements VodService {
 
 
     }
+
+    @Override
+    public void removeMoreAlyVideo(List videoIdList) {
+        try {
+            //初始化对象
+            DefaultAcsClient client = InitVodClient.initVodClient(ConstantVodUtils.ACCESS_KEY_ID, ConstantVodUtils.ACCESS_KEY_SECRET);
+            //创建删除视频request对象
+            DeleteVideoRequest request = new DeleteVideoRequest();
+
+            //videoIdList值转换成 1,2,3
+            String videoIds = StringUtils.join(videoIdList.toArray(), ",");
+
+            //向request设置视频id
+            request.setVideoIds(videoIds);
+            //调用初始化对象的方法实现删除
+            client.getAcsResponse(request);
+        }catch(Exception e) {
+            e.printStackTrace();
+            throw new GuliException(20001,"删除视频失败");
+        }
+    }
+
+
+
+
 }
